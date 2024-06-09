@@ -8,12 +8,12 @@ import (
 )
 
 type PostgresStore struct {
-	db *sql.DB
+	Db *sql.DB
 }
 
 func ConfigureDB() (*PostgresStore, error){
 	fmt.Println("Connecting to Postgres")
-	connection_string := "user=postgres dbname=postgres password=godeploy sslmode=disable"
+	connection_string := "user=postgres dbname=postgres password=password sslmode=disable"
 	db, err := sql.Open( "postgres", connection_string)
 
 	if err != nil {
@@ -21,6 +21,6 @@ func ConfigureDB() (*PostgresStore, error){
 	}
 
 	return &PostgresStore{
-		db: db,
+		Db: db,
 	}, nil
 } 
