@@ -8,14 +8,13 @@ import (
 	"reflect"
 	"sync"
 
-	guuid "github.com/google/uuid"
 	"github.com/karan2704/kube-deploy/models"
 	"gopkg.in/yaml.v2"
 )
 
 
 
-func YamlGenerator(fields models.Application, namespace string, errorChannel chan<-error, wg *sync.WaitGroup, db *sql.DB) () {
+func YamlGenerator(fields models.Application, namespace string, errorChannel chan<-error, appId string, wg *sync.WaitGroup, db *sql.DB) () {
 	defer wg.Done()
 
 	secrets := unsetSecrets(fields)
@@ -115,7 +114,11 @@ func YamlGenerator(fields models.Application, namespace string, errorChannel cha
 
 	fmt.Printf("%s manifest.yaml created successfully \n", fields.Name)
 
-	_, err = db.Exec(models.InsertManifestFiles, fields.Name, fullYAML)
+	_, err = db.Exec(models.InsertFileQuery, fileName, fullYAML, appId)
+	if err != nil {
+		errorChannel <- fmt.Errorf("error writing filename to database %s", err)
+		return
+	}
 
 	return
 }
@@ -130,8 +133,4 @@ func unsetSecrets(fields models.Application) (*map[string]string){
 		secrets[types.Field(i).Name] = envVars.Field(i).String()
 	}
 	return &secrets
-}
-
-func getUUID()(string){
-	return guuid.New()
 }
